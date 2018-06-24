@@ -1,6 +1,7 @@
 from __future__ import print_function, division
 import scipy
-
+import os
+os.environ["CUDA_VISIBLE_DEVICES"]="2"
 from keras.datasets import mnist
 from keras_contrib.layers.normalization import InstanceNormalization
 from keras.layers import Input, Dense, Reshape, Flatten, Dropout, Concatenate
@@ -14,7 +15,7 @@ import matplotlib.pyplot as plt
 import sys
 from data_loader import DataLoader
 import numpy as np
-import os
+
 
 class CycleGAN():
     def __init__(self):
