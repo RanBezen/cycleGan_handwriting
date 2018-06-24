@@ -100,64 +100,66 @@ class CycleGAN():
 
     def build_generator(self):
         """U-Net Generator"""
+        with tf.device('/gpu:2'):
+            def conv2d(layer_input, filters, f_size=4):
+                """Layers used during downsampling"""
+                d = Conv2D(filters, kernel_size=f_size, strides=2, padding='same')(layer_input)
+                d = LeakyReLU(alpha=0.2)(d)
+                d = InstanceNormalization()(d)
+                return d
 
-        def conv2d(layer_input, filters, f_size=4):
-            """Layers used during downsampling"""
-            d = Conv2D(filters, kernel_size=f_size, strides=2, padding='same')(layer_input)
-            d = LeakyReLU(alpha=0.2)(d)
-            d = InstanceNormalization()(d)
-            return d
+            def deconv2d(layer_input, skip_input, filters, f_size=4, dropout_rate=0):
+                """Layers used during upsampling"""
+                u = UpSampling2D(size=2)(layer_input)
+                u = Conv2D(filters, kernel_size=f_size, strides=1, padding='same', activation='relu')(u)
+                if dropout_rate:
+                    u = Dropout(dropout_rate)(u)
+                u = InstanceNormalization()(u)
+                u = Concatenate()([u, skip_input])
+                return u
 
-        def deconv2d(layer_input, skip_input, filters, f_size=4, dropout_rate=0):
-            """Layers used during upsampling"""
-            u = UpSampling2D(size=2)(layer_input)
-            u = Conv2D(filters, kernel_size=f_size, strides=1, padding='same', activation='relu')(u)
-            if dropout_rate:
-                u = Dropout(dropout_rate)(u)
-            u = InstanceNormalization()(u)
-            u = Concatenate()([u, skip_input])
-            return u
+                # Image input
 
-        # Image input
+            d0 = Input(shape=self.img_shape)
 
-        d0 = Input(shape=self.img_shape)
+            # Downsampling
+            d1 = conv2d(d0, self.gf)
+            d2 = conv2d(d1, self.gf * 2)
+            d3 = conv2d(d2, self.gf * 4)
+            d4 = conv2d(d3, self.gf * 8)
 
-        # Downsampling
-        d1 = conv2d(d0, self.gf)
-        d2 = conv2d(d1, self.gf*2)
-        d3 = conv2d(d2, self.gf*4)
-        d4 = conv2d(d3, self.gf*8)
+            # Upsampling
+            u1 = deconv2d(d4, d3, self.gf * 4)
+            u2 = deconv2d(u1, d2, self.gf * 2)
+            u3 = deconv2d(u2, d1, self.gf)
 
-        # Upsampling
-        u1 = deconv2d(d4, d3, self.gf*4)
-        u2 = deconv2d(u1, d2, self.gf*2)
-        u3 = deconv2d(u2, d1, self.gf)
+            u4 = UpSampling2D(size=2)(u3)
+            output_img = Conv2D(self.channels, kernel_size=4, strides=1, padding='same', activation='tanh')(u4)
 
-        u4 = UpSampling2D(size=2)(u3)
-        output_img = Conv2D(self.channels, kernel_size=4, strides=1, padding='same', activation='tanh')(u4)
-
-        return Model(d0, output_img)
+            return Model(d0, output_img)
 
     def build_discriminator(self):
+        with tf.device('/gpu:2'):
+            def d_layer(layer_input, filters, f_size=4, normalization=True):
+                """Discriminator layer"""
+                d = Conv2D(filters, kernel_size=f_size, strides=2, padding='same')(layer_input)
+                d = LeakyReLU(alpha=0.2)(d)
+                if normalization:
+                    d = InstanceNormalization()(d)
+                return d
 
-        def d_layer(layer_input, filters, f_size=4, normalization=True):
-            """Discriminator layer"""
-            d = Conv2D(filters, kernel_size=f_size, strides=2, padding='same')(layer_input)
-            d = LeakyReLU(alpha=0.2)(d)
-            if normalization:
-                d = InstanceNormalization()(d)
-            return d
+            img = Input(shape=self.img_shape)
 
-        img = Input(shape=self.img_shape)
+            d1 = d_layer(img, self.df, normalization=False)
+            d2 = d_layer(d1, self.df * 2)
+            d3 = d_layer(d2, self.df * 4)
+            d4 = d_layer(d3, self.df * 8)
 
-        d1 = d_layer(img, self.df, normalization=False)
-        d2 = d_layer(d1, self.df*2)
-        d3 = d_layer(d2, self.df*4)
-        d4 = d_layer(d3, self.df*8)
+            validity = Conv2D(1, kernel_size=4, strides=1, padding='same')(d4)
 
-        validity = Conv2D(1, kernel_size=4, strides=1, padding='same')(d4)
+            return Model(img, validity)
 
-        return Model(img, validity)
+
 
     def train(self, epochs, batch_size=1, sample_interval=50):
         with tf.device('/gpu:2'):
