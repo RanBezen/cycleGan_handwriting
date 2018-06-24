@@ -275,4 +275,4 @@ class CycleGAN():
 
 if __name__ == '__main__':
     gan = CycleGAN()
-    gan.train(epochs=200, batch_size=1, sample_interval=200)
+    gan.train(epochs=200, batch_size=1, sample_interval=400)
