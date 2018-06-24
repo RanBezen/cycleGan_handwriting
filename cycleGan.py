@@ -100,7 +100,7 @@ class CycleGAN():
 
     def build_generator(self):
         """U-Net Generator"""
-        with tf.device('/gpu:2'):
+        with tf.device('/gpu:1'):
             def conv2d(layer_input, filters, f_size=4):
                 """Layers used during downsampling"""
                 d = Conv2D(filters, kernel_size=f_size, strides=2, padding='same')(layer_input)
@@ -139,7 +139,7 @@ class CycleGAN():
             return Model(d0, output_img)
 
     def build_discriminator(self):
-        with tf.device('/gpu:2'):
+        with tf.device('/gpu:3'):
             def d_layer(layer_input, filters, f_size=4, normalization=True):
                 """Discriminator layer"""
                 d = Conv2D(filters, kernel_size=f_size, strides=2, padding='same')(layer_input)
