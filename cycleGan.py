@@ -19,6 +19,7 @@ import tensorflow as tf
 class CycleGAN():
     def __init__(self):
         # Input shape
+	self.gpu_num='/gpu:0'
         self.img_rows = 48
         self.img_cols = 512
         self.channels = 1
@@ -100,7 +101,7 @@ class CycleGAN():
 
     def build_generator(self):
         """U-Net Generator"""
-        with tf.device('/gpu:1'):
+        with tf.device(self.gpu_num):
             def conv2d(layer_input, filters, f_size=4):
                 """Layers used during downsampling"""
                 d = Conv2D(filters, kernel_size=f_size, strides=2, padding='same')(layer_input)
@@ -139,7 +140,7 @@ class CycleGAN():
             return Model(d0, output_img)
 
     def build_discriminator(self):
-        with tf.device('/gpu:3'):
+        with tf.device(self.gpu_num):
             def d_layer(layer_input, filters, f_size=4, normalization=True):
                 """Discriminator layer"""
                 d = Conv2D(filters, kernel_size=f_size, strides=2, padding='same')(layer_input)
@@ -162,7 +163,7 @@ class CycleGAN():
 
 
     def train(self, epochs, batch_size=1, sample_interval=50):
-        with tf.device('/gpu:2'):
+        with tf.device(self.gpu_num):
             start_time = datetime.datetime.now()
 
             # Adversarial loss ground truths
