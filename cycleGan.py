@@ -315,6 +315,6 @@ if __name__ == '__main__':
 
     im = np.array(im)/127.5 - 1.
     im = np.expand_dims(im, axis=3)
-    gan.saveAtoB(im,'test.png)
+    gan.saveAtoB(im,'test.png')
 
     """
