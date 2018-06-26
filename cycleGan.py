@@ -11,6 +11,7 @@ from keras.models import Sequential, Model
 from keras.optimizers import Adam
 import datetime
 import matplotlib.pyplot as plt
+plt.use('Agg')
 import sys
 from data_loader import DataLoader
 import numpy as np
