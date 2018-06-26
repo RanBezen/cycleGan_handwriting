@@ -15,6 +15,8 @@ import sys
 from data_loader import DataLoader
 import numpy as np
 import tensorflow as tf
+from keras.models import load_model
+import scipy
 
 class CycleGAN():
     def __init__(self):
