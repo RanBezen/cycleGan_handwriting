@@ -10,8 +10,15 @@ from keras.layers.convolutional import UpSampling2D, Conv2D
 from keras.models import Sequential, Model
 from keras.optimizers import Adam
 import datetime
+#import matplotlib.pyplot as plt
+
+import os
+import matplotlib as mpl
+if os.environ.get('DISPLAY','') == '':
+    print('no display found. Using non-interactive Agg backend')
+    mpl.use('Agg')
 import matplotlib.pyplot as plt
-plt.use('Agg')
+
 import sys
 from data_loader import DataLoader
 import numpy as np
