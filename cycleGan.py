@@ -36,8 +36,8 @@ class CycleGAN():
         self.disc_patch = (patch, 32, 1)
 
         # Number of filters in the first layer of G and D
-        self.gf = 32
-        self.df = 64
+        self.gf = 128
+        self.df = 128
 
         # Loss weights
         self.lambda_cycle = 10.0                    # Cycle-consistency loss
@@ -226,6 +226,32 @@ class CycleGAN():
                         print('model saved')
 
 
+    def saveAtoB(self, imgs_A,name):
+      
+      fake_B = self.g_AB.predict(imgs_A)
+      # Translate back to original domain
+      reconstr_A = self.g_BA.predict(fake_B)
+      gen_imgs = np.concatenate([imgs_A, fake_B, reconstr_A])
+      # Rescale images 0 - 1
+      gen_imgs = 0.5 * gen_imgs + 0.5
+      titles = ['Original', 'Translated', 'Reconstructed']
+      fig1, axs1 = plt.subplots(3)
+      cnt = 0
+       
+      for j in range(3):
+            axs1[j].imshow(gen_imgs[cnt, :, :, 0], cmap='gray')
+            axs1[j].set_title(titles[j])
+            axs1[j].axis('off')
+            cnt += 1
+      fig1.savefig(name) 
+      plt.close()   
+      print("img saved")
+      
+      
+    def upload_model(self):
+        self.g_AB=load_model('saved_model/cycGenAB.h5')
+        self.g_BA=load_model('saved_model/cycGenBA.h5')
+        print('model uploaded')
 
     def sample_images(self, epoch, batch_i):
         #os.makedirs('images/%s' % self.dataset_name, exist_ok=True)
@@ -280,3 +306,15 @@ class CycleGAN():
 if __name__ == '__main__':
     gan = CycleGAN()
     gan.train(epochs=200, batch_size=1, sample_interval=400)
+    """
+    gan.upload_model()
+    im=[]
+    pathA='A.jpg'
+    imA=scipy.misc.imread(pathA, mode='L').astype(np.float)
+    im.append(imA)
+
+    im = np.array(im)/127.5 - 1.
+    im = np.expand_dims(im, axis=3)
+    gan.saveAtoB(im,'test.png)
+
+    """
