@@ -21,7 +21,7 @@ import scipy
 class CycleGAN():
     def __init__(self):
         # Input shape
-	self.gpu_num='/gpu:0'
+	self.gpu_num='/gpu:1'
         self.img_rows = 48
         self.img_cols = 512
         self.channels = 1
