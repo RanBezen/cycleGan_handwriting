@@ -25,6 +25,7 @@ import numpy as np
 import tensorflow as tf
 from keras.models import load_model
 import scipy
+os.environ["CUDA_VISIBLE_DEVICES"]="0" 
 
 class CycleGAN():
     def __init__(self):
@@ -171,7 +172,6 @@ class CycleGAN():
 
 
     def train(self, epochs, batch_size=1, sample_interval=50):
-        with tf.device('/GPU:1'):
             start_time = datetime.datetime.now()
 
             # Adversarial loss ground truths
