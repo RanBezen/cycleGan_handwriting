@@ -80,5 +80,4 @@ class DataLoader():
 
     def imread(self, path):
         r=scipy.misc.imread(path, mode='L').astype(np.float)
-        print(r.shape)
         return r
