@@ -118,8 +118,8 @@ class CycleGAN():
 
         def conv2d(layer_input, filters, f_size=3):
             """Layers used during downsampling"""
-            d = Conv2D(filters, kernel_size=f_size, strides=2, padding='same')(layer_input)
-            d = Conv2D(filters, kernel_size=f_size, strides=2, padding='SAME')(layer_input)
+            d1 = Conv2D(filters, kernel_size=f_size, strides=2, padding='same')(layer_input)
+            d = Conv2D(filters, kernel_size=f_size, padding='SAME')(d1)
             d = LeakyReLU(alpha=0.2)(d)
             d = InstanceNormalization()(d)
             return d
