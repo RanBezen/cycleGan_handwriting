@@ -124,7 +124,7 @@ class CycleGAN():
             d = InstanceNormalization()(d)
             return d
 
-        def deconv2d(layer_input, skip_input, filters, f_size=3, dropout_rate=0):
+        def deconv2d(layer_input, skip_input, filters, f_size=3, dropout_rate=0.2):
             """Layers used during upsampling"""
             u = UpSampling2D(size=2)(layer_input)
             u = Conv2D(filters, kernel_size=f_size, strides=1, padding='same', activation='relu')(u)
@@ -160,6 +160,7 @@ class CycleGAN():
             def d_layer(layer_input, filters, f_size=3, normalization=True):
                 """Discriminator layer"""
                 d = Conv2D(filters, kernel_size=f_size, strides=2, padding='same')(layer_input)
+                d = Conv2D(filters, kernel_size=f_size, strides=2, padding='same')(d)
                 d = LeakyReLU(alpha=0.2)(d)
                 if normalization:
                     d = InstanceNormalization()(d)
@@ -172,7 +173,7 @@ class CycleGAN():
             d3 = d_layer(d2, self.df * 4)
             d4 = d_layer(d3, self.df * 8)
 
-            validity = Conv2D(1, kernel_size=4, strides=1, padding='same')(d4)
+            validity = Conv2D(1, kernel_size=3, strides=1, padding='same')(d4)
 
             return Model(img, validity)
 
