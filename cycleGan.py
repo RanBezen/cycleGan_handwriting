@@ -25,7 +25,7 @@ import numpy as np
 import tensorflow as tf
 from keras.models import load_model
 import scipy
-os.environ["CUDA_VISIBLE_DEVICES"]="0" 
+os.environ["CUDA_VISIBLE_DEVICES"]="1" 
 
 class CycleGAN():
     def __init__(self):
@@ -110,20 +110,29 @@ class CycleGAN():
                                             self.lambda_id, self.lambda_id ],
                             optimizer=optimizer)
 
+	
+	
+	
     def build_generator(self):
             """U-Net Generator"""
-            def conv2d(layer_input, filters, f_size=4):
+            def conv2d(layer_input, filters, f_size=3):
                 """Layers used during downsampling"""
                 d = Conv2D(filters, kernel_size=f_size, strides=2, padding='same')(layer_input)
-                d = LeakyReLU(alpha=0.2)(d)
+                d = Conv2D(filters, kernel_size=f_size, strides=2, padding='same')(d)
+		d = Concatenate()([d, layer_input])
+		d = LeakyReLU(alpha=0.2)(d)
                 d = InstanceNormalization()(d)
                 return d
 
             def deconv2d(layer_input, skip_input, filters, f_size=4, dropout_rate=0):
                 """Layers used during upsampling"""
-                u = UpSampling2D(size=2)(layer_input)
-                u = Conv2D(filters, kernel_size=f_size, strides=1, padding='same', activation='relu')(u)
-                if dropout_rate:
+                up1 = UpSampling2D(size=2)(layer_input)
+                u = Conv2D(filters, kernel_size=f_size, strides=1, padding='same', activation='relu')(up1)
+		
+		u = Conv2D(filters, kernel_size=f_size, strides=1, padding='same', activation='relu')(u)
+                u = Concatenate()([u, up1]
+				  
+		if dropout_rate:
                     u = Dropout(dropout_rate)(u)
                 u = InstanceNormalization()(u)
                 u = Concatenate()([u, skip_input])
