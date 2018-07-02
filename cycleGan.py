@@ -7,6 +7,7 @@ from keras.layers import Input, Dense, Reshape, Flatten, Dropout, Concatenate
 from keras.layers import BatchNormalization, Activation, ZeroPadding2D
 from keras.layers.advanced_activations import LeakyReLU
 from keras.layers.convolutional import UpSampling2D, Conv2D
+from keras.layers import Cropping2D
 from keras.models import Sequential, Model
 from keras.optimizers import Adam
 import datetime
@@ -132,7 +133,7 @@ class CycleGAN():
                 if dropout_rate:
                    u = Dropout(dropout_rate)(u)
                 u = InstanceNormalization()(u)
-		sl=Cropping2D(cropping=2)(skip_input)
+                sl = skip_input
                 u = Concatenate()([u, sl])
                 return u
 
@@ -147,9 +148,13 @@ class CycleGAN():
             d4 = conv2d(d3, self.gf * 8)
 
             # Upsampling
-            u1 = deconv2d(d4, d3, self.gf * 4)
-            u2 = deconv2d(u1, d2, self.gf * 2)
-            u3 = deconv2d(u2, d1, self.gf)
+            sl3 = Cropping2D(cropping=((0,0),(2,2)))(d3)
+            sl3 = UpSampling2D(size=(2,1))(sl3)
+            u1 = deconv2d(d4, sl3, self.gf * 4)
+            sl2=Cropping2D(cropping=((0,0),(2,2)))(d2)
+            u2 = deconv2d(u1, sl2, self.gf * 2)
+            sl1=Cropping2D(cropping=((0,0),(2,2)))(d1)
+            u3 = deconv2d(u2, sl1, self.gf)
 
             u4 = UpSampling2D(size=2)(u3)
             output_img = Conv2D(self.channels, kernel_size=4, strides=1, padding='same', activation='tanh')(u4)
