@@ -113,55 +113,48 @@ class CycleGAN():
 
 	
 	
-	
     def build_generator(self):
-            """U-Net Generator"""
-            def conv2d(layer_input, filters, f_size=3):
-                """Layers used during downsampling"""
-                d1 = Conv2D(filters, kernel_size=f_size, strides=2, padding='same')(layer_input)
-                #d2 = Conv2D(filters, kernel_size=f_size, strides=2, padding='same')(d1)
-                d = LeakyReLU(alpha=0.2)(d2)
-                d = InstanceNormalization()(d)
-                return d
+        """U-Net Generator"""
 
-            def deconv2d(layer_input, skip_input, filters, f_size=3, dropout_rate=0):
-                """Layers used during upsampling"""
-                up1 = UpSampling2D(size=2)(layer_input)
-                u = Conv2D(filters, kernel_size=f_size, strides=1, padding='same', activation='relu')(up1)
-                #u = Conv2D(filters, kernel_size=f_size, strides=1, padding='same', activation='relu')(u)			  
-               
-                if dropout_rate:
-                   u = Dropout(dropout_rate)(u)
-                u = InstanceNormalization()(u)
-                sl = skip_input
-                u = Concatenate()([u, sl])
-                return u
+        def conv2d(layer_input, filters, f_size=3):
+            """Layers used during downsampling"""
+            d = Conv2D(filters, kernel_size=f_size, strides=2, padding='same')(layer_input)
+            d = Conv2D(filters, kernel_size=f_size, strides=2, padding='SAME')(layer_input)
+            d = LeakyReLU(alpha=0.2)(d)
+            d = InstanceNormalization()(d)
+            return d
 
-                # Image input
+        def deconv2d(layer_input, skip_input, filters, f_size=3, dropout_rate=0):
+            """Layers used during upsampling"""
+            u = UpSampling2D(size=2)(layer_input)
+            u = Conv2D(filters, kernel_size=f_size, strides=1, padding='same', activation='relu')(u)
+            u = Conv2D(filters, kernel_size=f_size, strides=1, padding='SAME', activation='relu')(u)
 
-            d0 = Input(shape=self.img_shape)
+            if dropout_rate:
+                u = Dropout(dropout_rate)(u)
+            u = InstanceNormalization()(u)
+            u = Concatenate()([u, skip_input])
+            return u
 
-            # Downsampling
-            d1 = conv2d(d0, self.gf)
-            d2 = conv2d(d1, self.gf * 2)
-            d3 = conv2d(d2, self.gf * 4)
-            d4 = conv2d(d3, self.gf * 8)
+        # Image input
 
-            # Upsampling
-            #sl3 = Cropping2D(cropping=((0,0),(2,2)))(d3)
-            sl3=d3
-	    u1 = deconv2d(d4, sl3, self.gf * 4)
-            #sl2=Cropping2D(cropping=((0,0),(2,2)))(d2)
-            sl2=d2
-	    u2 = deconv2d(u1, sl2, self.gf * 2)
-            #sl1=Cropping2D(cropping=((0,0),(2,2)))(d1)
-            sl1=d1
-	    u3 = deconv2d(u2, sl1, self.gf)
+        d0 = Input(shape=self.img_shape)
 
-            u4 = UpSampling2D(size=2)(u3)
-            output_img = Conv2D(self.channels, kernel_size=4, strides=1, padding='same', activation='tanh')(u4)
+        # Downsampling
+        d1 = conv2d(d0, self.gf)
+        d2 = conv2d(d1, self.gf*2)
+        d3 = conv2d(d2, self.gf*4)
+        d4 = conv2d(d3, self.gf*8)
 
-            return Model(d0, output_img)
+        # Upsampling
+        u1 = deconv2d(d4, d3, self.gf*4)
+        u2 = deconv2d(u1, d2, self.gf*2)
+        u3 = deconv2d(u2, d1, self.gf)
+
+        u4 = UpSampling2D(size=2)(u3)
+        output_img = Conv2D(self.channels, kernel_size=4, strides=1, padding='same', activation='tanh')(u4)
+
+        return Model(d0, output_img)
 
     def build_discriminator(self):
             def d_layer(layer_input, filters, f_size=3, normalization=True):
