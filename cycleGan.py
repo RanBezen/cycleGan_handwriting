@@ -132,7 +132,8 @@ class CycleGAN():
                 if dropout_rate:
                    u = Dropout(dropout_rate)(u)
                 u = InstanceNormalization()(u)
-                u = Concatenate()([u, skip_input])
+		sl=Cropping2D(cropping=2)(skip_input)
+                u = Concatenate()([u, sl])
                 return u
 
                 # Image input
