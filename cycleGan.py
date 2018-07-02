@@ -119,7 +119,7 @@ class CycleGAN():
             def conv2d(layer_input, filters, f_size=3):
                 """Layers used during downsampling"""
                 d1 = Conv2D(filters, kernel_size=f_size, strides=2, padding='same')(layer_input)
-                d2 = Conv2D(filters, kernel_size=f_size, strides=2, padding='same')(d1)
+                #d2 = Conv2D(filters, kernel_size=f_size, strides=2, padding='same')(d1)
                 d = LeakyReLU(alpha=0.2)(d2)
                 d = InstanceNormalization()(d)
                 return d
@@ -128,7 +128,7 @@ class CycleGAN():
                 """Layers used during upsampling"""
                 up1 = UpSampling2D(size=2)(layer_input)
                 u = Conv2D(filters, kernel_size=f_size, strides=1, padding='same', activation='relu')(up1)
-                u = Conv2D(filters, kernel_size=f_size, strides=1, padding='same', activation='relu')(u)			  
+                #u = Conv2D(filters, kernel_size=f_size, strides=1, padding='same', activation='relu')(u)			  
                
                 if dropout_rate:
                    u = Dropout(dropout_rate)(u)
@@ -148,13 +148,15 @@ class CycleGAN():
             d4 = conv2d(d3, self.gf * 8)
 
             # Upsampling
-            sl3 = Cropping2D(cropping=((0,0),(2,2)))(d3)
-            sl3 = UpSampling2D(size=(2,1))(sl3)
-            u1 = deconv2d(d4, sl3, self.gf * 4)
-            sl2=Cropping2D(cropping=((0,0),(2,2)))(d2)
-            u2 = deconv2d(u1, sl2, self.gf * 2)
-            sl1=Cropping2D(cropping=((0,0),(2,2)))(d1)
-            u3 = deconv2d(u2, sl1, self.gf)
+            #sl3 = Cropping2D(cropping=((0,0),(2,2)))(d3)
+            sl3=d3
+	    u1 = deconv2d(d4, sl3, self.gf * 4)
+            #sl2=Cropping2D(cropping=((0,0),(2,2)))(d2)
+            sl2=d2
+	    u2 = deconv2d(u1, sl2, self.gf * 2)
+            #sl1=Cropping2D(cropping=((0,0),(2,2)))(d1)
+            sl1=d1
+	    u3 = deconv2d(u2, sl1, self.gf)
 
             u4 = UpSampling2D(size=2)(u3)
             output_img = Conv2D(self.channels, kernel_size=4, strides=1, padding='same', activation='tanh')(u4)
