@@ -91,8 +91,8 @@ class CycleGAN():
         img_B_id = self.g_AB(img_B)
 
         # For the combined model we will only train the generators
-        self.d_A.trainable = False
-        self.d_B.trainable = False
+        self.d_A.trainable = True
+        self.d_B.trainable = True
 
         # Discriminators determines validity of translated images
         valid_A = self.d_A(fake_A)
@@ -161,7 +161,7 @@ class CycleGAN():
             def d_layer(layer_input, filters, f_size=3, normalization=True):
                 """Discriminator layer"""
                 d = Conv2D(filters, kernel_size=f_size, strides=2, padding='same')(layer_input)
-                #d = Conv2D(filters, kernel_size=f_size, padding='same')(d1)
+                d = Conv2D(filters, kernel_size=f_size, padding='same')(d)
                 d = LeakyReLU(alpha=0.2)(d)
                 if normalization:
                     d = InstanceNormalization()(d)
