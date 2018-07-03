@@ -160,8 +160,8 @@ class CycleGAN():
     def build_discriminator(self):
             def d_layer(layer_input, filters, f_size=3, normalization=True):
                 """Discriminator layer"""
-                d1 = Conv2D(filters, kernel_size=f_size, strides=2, padding='same')(layer_input)
-                d = Conv2D(filters, kernel_size=f_size, padding='same')(d1)
+                d = Conv2D(filters, kernel_size=f_size, strides=2, padding='same')(layer_input)
+                #d = Conv2D(filters, kernel_size=f_size, padding='same')(d1)
                 d = LeakyReLU(alpha=0.2)(d)
                 if normalization:
                     d = InstanceNormalization()(d)
@@ -322,7 +322,7 @@ class CycleGAN():
 
 if __name__ == '__main__':
     gan = CycleGAN()
-    gan.train(epochs=250, batch_size=1, sample_interval=400)
+    gan.train(epochs=150, batch_size=1, sample_interval=400)
     """
     gan.upload_model()
     im=[]
