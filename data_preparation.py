@@ -1,15 +1,13 @@
 import tensorflow as tf
 from tensorflow.python.platform import gfile
 import numpy as np
-import os
-
 import cv2
 from PIL import Image
 import glob, os
 
 
 def prepare_data(img_dir):
-
+    #create list of the images dir name
     image_dirs = np.array([dirpath for (dirpath, dirnames, filenames) in gfile.Walk(os.getcwd()+'/'+img_dir)])
     file_list = []
     extensions = ['jpg', 'JPEG']
@@ -26,6 +24,7 @@ def prepare_data(img_dir):
 
 
 def read_image_array_np_GRAYSCALE(image_loc_array,w,h):
+    #create a numpy array of images from the paths array
     resized_image_array=[]
     i=0
     for image_loc in image_loc_array:
@@ -46,6 +45,13 @@ def create_npy_file(arr,name):
 
 
 
+def create_large_folder(dir,new_dir):
+    for x in os.walk(dir):
+        if x[2]:
+            #changeDir(x, new_dir)
+            changeDirAndProcess(x, new_dir)
+            print(x[2])
+
 
 def changeDirAndProcess(x,newPath):
     for i in x[2]:
@@ -54,14 +60,6 @@ def changeDirAndProcess(x,newPath):
         #print("old",dir)
         newDir=newPath+file+'.jpg'
         image_preperation(dir,newDir)
-
-
-def create_large_folder(dir,new_dir):
-    for x in os.walk(dir):
-        if x[2]:
-            #changeDir(x, new_dir)
-            changeDirAndProcess(x, new_dir)
-            print(x[2])
 
 
 def image_preperation(im_pth, newPath):
@@ -102,20 +100,19 @@ def image_preperation(im_pth, newPath):
     img_back = Image.fromarray(img_back)
     img_back=img_back.resize([512,48])
     img_back = img_back.convert('L')
-    #img_back.show()
     img_back.save(newPath)
 
 
-
+#extract the IAM Handwriting Database from the sub folders, and processing the images for noise cleaning
 dir='lines'
 new_dir='datasets/sentences/trainB/'
 create_large_folder(dir,new_dir)
 
+"""
+#creating a numpy array from the all images nd save it on npy file
+file_list = prepare_data(new_dir)
+resized_image_array=read_image_array_np_GRAYSCALE(file_list,600,32)
+create_npy_file(resized_image_array,"x_data")
+"""
 
-#file_list = prepare_data(new_dir)
-#resized_image_array=read_image_array_np_GRAYSCALE(file_list,600,32)
-#create_npy_file(resized_image_array,"x_data")
 
-
-#x_data = np.load("x_data.npy")
-#print(x_data.shape)
