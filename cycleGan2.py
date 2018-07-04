@@ -234,8 +234,8 @@ class CycleGAN():
 
                     # If at save interval => save generated image samples
                     if batch_i % sample_interval == 0:
-                        self.sample_images(epoch, batch_i)
                         if batch_i>100:
+                            self.sample_images(epoch, batch_i)
                             self.g_AB.save('saved_model/cycGenAB_2'+str(epoch)+'.h5')
                             print('model saved')
 
