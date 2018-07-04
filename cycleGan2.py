@@ -19,7 +19,7 @@ if os.environ.get('DISPLAY','') == '':
     print('no display found. Using non-interactive Agg backend')
     mpl.use('Agg')
 import matplotlib.pyplot as plt
-
+import cv2
 import sys
 from data_loader import DataLoader
 import numpy as np
@@ -235,11 +235,9 @@ class CycleGAN():
                     # If at save interval => save generated image samples
                     if batch_i % sample_interval == 0:
                         self.sample_images(epoch, batch_i)
-                        self.d_A.save('saved_model/cycDiscA_2.h5')
-                        self.d_B.save('saved_model/cycDiscB_2.h5')
-                        self.g_AB.save('saved_model/cycGenAB_2.h5')
-                        self.g_BA.save('saved_model/cycGenBA_2.h5')
-                        print('model saved')
+                        if batch_i>100:
+                            self.g_AB.save('saved_model/cycGenAB_2'+str(epoch)+'.h5')
+                            print('model saved')
 
     def saveAtoB(self, imgs_A, name):
 
@@ -314,11 +312,11 @@ class CycleGAN():
 if __name__ == '__main__':
     gan = CycleGAN()
     #for training agian flease run the line below:
-    #gan.train(epochs=150, batch_size=1, sample_interval=200)
+    gan.train(epochs=160, batch_size=1, sample_interval=578)
 
-    gan.upload_model()
-    response = input("Please enter a sentence: ")
-    im = str_to_image(response)
+    #gan.upload_model()
+    #response = input("Please enter a sentence: ")
+    #im = str_to_image(response)
 
     """
     #if you want to run it from local image
@@ -329,4 +327,11 @@ if __name__ == '__main__':
     im = np.array(im)/127.5 - 1.
     im = np.expand_dims(im, axis=3)
     """
+    """    
     gan.saveAtoB(im,'test_arch2.png')
+    pathA='test_arch2.png'
+    img=cv2.imread(pathA)
+    cv2.imshow('image',img)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+    """
