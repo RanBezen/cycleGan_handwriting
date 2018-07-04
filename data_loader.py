@@ -1,24 +1,19 @@
 import scipy
 from glob import glob
 import numpy as np
-from PIL import Image
-
 class DataLoader():
-    def __init__(self, dataset_name, img_res=(128, 128)):
+    def __init__(self, dataset_name, img_res):
         self.dataset_name = dataset_name
         self.img_res = img_res
 
     def load_data(self, domain, batch_size=1, is_testing=False):
         data_type = "train%s" % domain if not is_testing else "test%s" % domain
         path = glob('./datasets/%s/%s/*' % (self.dataset_name, data_type))
-
         batch_images = np.random.choice(path, size=batch_size)
-
         imgs = []
         for img_path in batch_images:
             img = self.imread(img_path)
             if not is_testing:
-                #img = scipy.misc.imresize(img, self.img_res)
 
                 if np.random.random() > 0.5:
                     img = np.fliplr(img)
