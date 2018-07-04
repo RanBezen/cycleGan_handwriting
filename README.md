@@ -188,3 +188,12 @@ As we can see in the samples, the best results were of Architecture 2. It is not
 
 #### Architecture 3
 ![Image description](https://github.com/RanBezen/cycleGan/blob/master/tmp/arch3.png)
+
+## The system:
+The system, with its three different architectures, is ready for use. I trained the three networks and kept the weights of each. I developed a test system that receives input from the user. The output is an image of the printed text, and a handwriting translation
+
+Input: Network testing, Rans project.
+![Image description](https://github.com/RanBezen/cycleGan/blob/master/tmp/input.png)
+
+Output:
+![Image description](https://github.com/RanBezen/cycleGan/blob/master/tmp/output.png)
