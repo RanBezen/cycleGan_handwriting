@@ -233,8 +233,8 @@ class CycleGAN():
                            elapsed_time))
 
                     # If at save interval => save generated image samples
-                    if batch_i % sample_interval == 0:
-                        if batch_i>100:
+                    if epoch >= 100:
+                        if batch_i % sample_interval == 0:
                             self.sample_images(epoch, batch_i)
                             self.g_AB.save('saved_model/cycGenAB_2'+str(epoch)+'.h5')
                             print('model saved')
@@ -312,11 +312,11 @@ class CycleGAN():
 if __name__ == '__main__':
     gan = CycleGAN()
     #for training agian flease run the line below:
-    gan.train(epochs=160, batch_size=1, sample_interval=578)
+    gan.train(epochs=160, batch_size=1, sample_interval=189)
 
     #gan.upload_model()
     #response = input("Please enter a sentence: ")
-    #im = str_to_image(response)
+    #im=str_to_image(response)
 
     """
     #if you want to run it from local image
@@ -327,7 +327,7 @@ if __name__ == '__main__':
     im = np.array(im)/127.5 - 1.
     im = np.expand_dims(im, axis=3)
     """
-    """    
+    """
     gan.saveAtoB(im,'test_arch2.png')
     pathA='test_arch2.png'
     img=cv2.imread(pathA)
