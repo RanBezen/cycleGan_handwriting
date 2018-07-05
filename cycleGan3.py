@@ -13,7 +13,7 @@ from keras.optimizers import Adam
 import datetime
 #import matplotlib.pyplot as plt
 from text import str_to_image
-
+import cv2
 import os
 import matplotlib as mpl
 if os.environ.get('DISPLAY','') == '':
@@ -263,10 +263,11 @@ class CycleGAN():
         plt.close()
         print("img saved")
       
-    def upload_model(self):
-        self.g_AB=load_model('saved_model/cycGenAB_3.h5')
-        self.g_BA=load_model('saved_model/cycGenBA_3.h5')
+    def upload_model(self, model_name):
+        self.g_AB = load_model('saved_model/' + model_name)
+        # self.g_BA=load_model('saved_model/cycGenBA_3.h5')
         print('model uploaded')
+
 
     def sample_images(self, epoch, batch_i):
         c = 3
@@ -314,9 +315,11 @@ class CycleGAN():
 
 if __name__ == '__main__':
     gan = CycleGAN()
-    #gan.train(epochs=150, batch_size=1, sample_interval=200)
+    # for training agian flease run the line below:
+    # gan.train(epochs=160, batch_size=1, sample_interval=189)
 
-    gan.upload_model()
+    model_name = 'cycGenAB_3.h5'
+    gan.upload_model(model_name)
     response = input("Please enter a sentence: ")
     im = str_to_image(response)
 
@@ -329,4 +332,12 @@ if __name__ == '__main__':
     im = np.array(im)/127.5 - 1.
     im = np.expand_dims(im, axis=3)
     """
-    gan.saveAtoB(im,'test_arch3.png')
+
+    gan.saveAtoB(im, 'test_arch3.png')
+
+    # This part only for show the image on the screen, you can delete it if you want
+    pathA = 'test_arch3.png'
+    img = cv2.imread(pathA)
+    cv2.imshow('image', img)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
