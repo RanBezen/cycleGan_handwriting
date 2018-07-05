@@ -16,11 +16,15 @@ from keras.models import load_model
 import os
 import matplotlib as mpl
 from text import str_to_image
-if os.environ.get('DISPLAY','') == '':
+import cv2
+
+if os.environ.get('DISPLAY', '') == '':
     print('no display found. Using non-interactive Agg backend')
     mpl.use('Agg')
 import matplotlib.pyplot as plt
-os.environ["CUDA_VISIBLE_DEVICES"]="1"
+
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+
 
 class CycleGAN():
     def __init__(self):
@@ -35,9 +39,8 @@ class CycleGAN():
         self.data_loader = DataLoader(dataset_name=self.dataset_name,
                                       img_res=(self.img_rows, self.img_cols))
 
-
         # Calculate output shape of D (PatchGAN)
-        patch = int(self.img_rows / 2**4)
+        patch = int(self.img_rows / 2 ** 4)
         self.disc_patch = (patch, 32, 1)
 
         # Number of filters in the first layer of G and D
@@ -45,8 +48,8 @@ class CycleGAN():
         self.df = 64
 
         # Loss weights
-        self.lambda_cycle = 10.0                    # Cycle-consistency loss
-        self.lambda_id = 0.1 * self.lambda_cycle    # Identity loss
+        self.lambda_cycle = 10.0  # Cycle-consistency loss
+        self.lambda_id = 0.1 * self.lambda_cycle  # Identity loss
 
         optimizer = Adam(0.0002, 0.5)
 
@@ -54,16 +57,16 @@ class CycleGAN():
         self.d_A = self.build_discriminator()
         self.d_B = self.build_discriminator()
         self.d_A.compile(loss='mse',
-            optimizer=optimizer,
-            metrics=['accuracy'])
+                         optimizer=optimizer,
+                         metrics=['accuracy'])
         self.d_B.compile(loss='mse',
-            optimizer=optimizer,
-            metrics=['accuracy'])
+                         optimizer=optimizer,
+                         metrics=['accuracy'])
 
-        #-------------------------
+        # -------------------------
         # Construct Computational
         #   Graph of Generators
-        #-------------------------
+        # -------------------------
 
         # Build the generators
         self.g_AB = self.build_generator()
@@ -93,16 +96,16 @@ class CycleGAN():
 
         # Combined model trains generators to fool discriminators
         self.combined = Model(inputs=[img_A, img_B],
-                              outputs=[ valid_A, valid_B,
-                                        reconstr_A, reconstr_B,
-                                        img_A_id, img_B_id ])
+                              outputs=[valid_A, valid_B,
+                                       reconstr_A, reconstr_B,
+                                       img_A_id, img_B_id])
         self.combined.compile(loss=['mse', 'mse',
                                     'mae', 'mae',
                                     'mae', 'mae'],
-                            loss_weights=[  1, 1,
+                              loss_weights=[1, 1,
                                             self.lambda_cycle, self.lambda_cycle,
-                                            self.lambda_id, self.lambda_id ],
-                            optimizer=optimizer)
+                                            self.lambda_id, self.lambda_id],
+                              optimizer=optimizer)
 
     def build_generator(self):
         """U-Net Generator"""
@@ -130,13 +133,13 @@ class CycleGAN():
 
         # Downsampling
         d1 = conv2d(d0, self.gf)
-        d2 = conv2d(d1, self.gf*2)
-        d3 = conv2d(d2, self.gf*4)
-        d4 = conv2d(d3, self.gf*8)
+        d2 = conv2d(d1, self.gf * 2)
+        d3 = conv2d(d2, self.gf * 4)
+        d4 = conv2d(d3, self.gf * 8)
 
         # Upsampling
-        u1 = deconv2d(d4, d3, self.gf*4)
-        u2 = deconv2d(u1, d2, self.gf*2)
+        u1 = deconv2d(d4, d3, self.gf * 4)
+        u2 = deconv2d(u1, d2, self.gf * 2)
         u3 = deconv2d(u2, d1, self.gf)
 
         u4 = UpSampling2D(size=2)(u3)
@@ -157,9 +160,9 @@ class CycleGAN():
         img = Input(shape=self.img_shape)
 
         d1 = d_layer(img, self.df, normalization=False)
-        d2 = d_layer(d1, self.df*2)
-        d3 = d_layer(d2, self.df*4)
-        d4 = d_layer(d3, self.df*8)
+        d2 = d_layer(d1, self.df * 2)
+        d3 = d_layer(d2, self.df * 4)
+        d4 = d_layer(d3, self.df * 8)
 
         validity = Conv2D(1, kernel_size=4, strides=1, padding='same')(d4)
 
@@ -196,29 +199,29 @@ class CycleGAN():
                 # Total disciminator loss
                 d_loss = 0.5 * np.add(dA_loss, dB_loss)
 
-
                 # ------------------
                 #  Train Generators
                 # ------------------
 
                 # Train the generators
                 g_loss = self.combined.train_on_batch([imgs_A, imgs_B],
-                                                        [valid, valid,
-                                                        imgs_A, imgs_B,
-                                                        imgs_A, imgs_B])
+                                                      [valid, valid,
+                                                       imgs_A, imgs_B,
+                                                       imgs_A, imgs_B])
 
                 elapsed_time = datetime.datetime.now() - start_time
 
                 # Plot the progress
-                print ("[Epoch %d/%d] [Batch %d/%d] [D loss: %f, acc: %3d%%] [G loss: %05f, adv: %05f, recon: %05f, id: %05f] time: %s " \
-                                                                        % ( epoch, epochs,
-                                                                            batch_i, self.data_loader.n_batches,
-                                                                            d_loss[0], 100*d_loss[1],
-                                                                            g_loss[0],
-                                                                            np.mean(g_loss[1:3]),
-                                                                            np.mean(g_loss[3:5]),
-                                                                            np.mean(g_loss[5:6]),
-                                                                            elapsed_time))
+                print(
+                    "[Epoch %d/%d] [Batch %d/%d] [D loss: %f, acc: %3d%%] [G loss: %05f, adv: %05f, recon: %05f, id: %05f] time: %s " \
+                    % (epoch, epochs,
+                       batch_i, self.data_loader.n_batches,
+                       d_loss[0], 100 * d_loss[1],
+                       g_loss[0],
+                       np.mean(g_loss[1:3]),
+                       np.mean(g_loss[3:5]),
+                       np.mean(g_loss[5:6]),
+                       elapsed_time))
 
                 # If at save interval => save generated image samples
                 if batch_i % sample_interval == 0:
@@ -249,9 +252,9 @@ class CycleGAN():
         plt.close()
         print("img saved")
 
-    def upload_model(self):
-        self.g_AB = load_model('saved_model/cycGenAB_1.h5')
-        self.g_BA = load_model('saved_model/cycGenBA_1.h5')
+    def upload_model(self, model_name):
+        self.g_AB = load_model('saved_model/' + model_name)
+        # self.g_BA=load_model('saved_model/cycGenBA_1.h5')
         print('model uploaded')
 
     def sample_images(self, epoch, batch_i):
@@ -283,24 +286,23 @@ class CycleGAN():
         plt.close()
 
         fig2, axs2 = plt.subplots(c)
-        cnt=3
+        cnt = 3
         for i in range(c):
             axs2[i].imshow(gen_imgs[cnt, :, :, 0], cmap='gray')
             axs2[i].set_title(titles[i])
             axs2[i].axis('off')
-            cnt+=1
-        fig2.savefig("images_cycle/BtoA/%d_%d.png" % (epoch+1, batch_i))
+            cnt += 1
+        fig2.savefig("images_cycle/BtoA/%d_%d.png" % (epoch + 1, batch_i))
         plt.close()
-
-
-
 
 
 if __name__ == '__main__':
     gan = CycleGAN()
-    #gan.train(epochs=150, batch_size=1, sample_interval=200)
+    # for training agian flease run the line below:
+    # gan.train(epochs=160, batch_size=1, sample_interval=189)
 
-    gan.upload_model()
+    model_name = 'cycGenAB_1.h5'
+    gan.upload_model(model_name)
     response = input("Please enter a sentence: ")
     im = str_to_image(response)
 
@@ -313,4 +315,13 @@ if __name__ == '__main__':
     im = np.array(im)/127.5 - 1.
     im = np.expand_dims(im, axis=3)
     """
-    gan.saveAtoB(im,'test_arch1.png')
+
+    gan.saveAtoB(im, 'test_arch1.png')
+
+    # This part only for show the image on the screen, you can delete it if you want
+    pathA = 'test_arch1.png'
+    img = cv2.imread(pathA)
+    cv2.imshow('image', img)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
