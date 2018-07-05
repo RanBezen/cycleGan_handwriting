@@ -259,9 +259,9 @@ class CycleGAN():
         plt.close()
         print("img saved")
       
-    def upload_model(self):
-        self.g_AB=load_model('saved_model/cycGenAB_2.h5')
-        self.g_BA=load_model('saved_model/cycGenBA_2.h5')
+    def upload_model(self,model_name):
+        self.g_AB=load_model('saved_model/'+model_name)
+        #self.g_BA=load_model('saved_model/cycGenBA_2.h5')
         print('model uploaded')
 
     def sample_images(self, epoch, batch_i):
@@ -312,11 +312,12 @@ class CycleGAN():
 if __name__ == '__main__':
     gan = CycleGAN()
     #for training agian flease run the line below:
-    gan.train(epochs=160, batch_size=1, sample_interval=189)
-
-    #gan.upload_model()
-    #response = input("Please enter a sentence: ")
-    #im=str_to_image(response)
+    #gan.train(epochs=160, batch_size=1, sample_interval=189)
+    # There is many saved model for architecture number 2all model will provide a diffrent output cycGenAB_2100.h5, cycGenAB_2100.h5 etc.
+    model_name = 'cycGenAB_2.h5'    
+    gan.upload_model(model_name)
+    response = input("Please enter a sentence: ")
+    im=str_to_image(response)
 
     """
     #if you want to run it from local image
@@ -327,11 +328,13 @@ if __name__ == '__main__':
     im = np.array(im)/127.5 - 1.
     im = np.expand_dims(im, axis=3)
     """
-    """
+    
     gan.saveAtoB(im,'test_arch2.png')
+    
+    #This part only for show the image on the screen, you can delete it if you want
     pathA='test_arch2.png'
     img=cv2.imread(pathA)
     cv2.imshow('image',img)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
-    """
+   
