@@ -9,7 +9,7 @@ The generator architecture is U-net. The U-net is convolutional network architec
 
 ## Datasets:
 ### Printed Dataset
-The first dataset is printed sentences that I build from a pdf online book "Education and Philosophical Ideal By Horatio W Dresser". I converted the pdf into jpeg format, and I cut the lines. For be sure the lines will crop well, I cropped the printed frame area.
+The first dataset is printed sentences that I built from a pdf online book "Education and Philosophical Ideal By Horatio W Dresser". I converted the pdf into jpeg format, and I cut the lines. For be sure the lines will crop well, I cropped the printed frame area.
 Then I resized the cropped image to the nearest integer that can divided by the rows number, and then, to achieve automatic line separator, it run with loop and cut the lines.
 In order to avoid a blank line, the program throws lines whose number of bytes is less than a certain threshold.
 for building the train/test datasets, I padded the images and resize them to the optimal size that I found the network working best- 512x48 
